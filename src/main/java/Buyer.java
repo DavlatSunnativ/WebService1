@@ -43,10 +43,8 @@ public class Buyer extends User{
             pstmnt.setString(5,password);
             pstmnt.executeUpdate();
             System.out.println("You succesfully signed up! You can log in now. ");
-        }catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        }catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
     }
     public void showProducts() throws SQLException, ClassNotFoundException {
@@ -58,12 +56,9 @@ public class Buyer extends User{
             while(rs.next()){
                 System.out.println(rs.getInt("id")+". "+rs.getInt("quantity")+" "+rs.getString("name")+"s is available by price "+rs.getDouble("price") );
             }
-        }catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        }catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
-
     }
     public void buyProducts(User buyer,int id, int quantity) throws SQLException, ClassNotFoundException {
         try {
@@ -80,6 +75,7 @@ public class Buyer extends User{
                 updateBank(buyer.getBank(),totalPrice, buyer.getId());
                 updateQuantity(rs.getInt("quantity"),quantity,id);
                 addOrder(id, buyer.getId(), quantity,totalPrice);
+                updateSalesmanBank(totalPrice,rs.getInt("salesman_id"));
 
                 System.out.println("Your order was added to your order list! ");
             }
@@ -89,10 +85,8 @@ public class Buyer extends User{
             else{
                 System.out.println("Not available quantity of product");
             }
-        }catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        }catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
     }
     public boolean isEnoughQuantity(int availableQuantity,int requestedQuantity){
@@ -112,31 +106,25 @@ public class Buyer extends User{
             stmnt.setInt(2,id);
             stmnt.setInt(1,availableQuantity-requestedQuantity);
             stmnt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        } catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
     }
     public boolean isEnoughBank(double totalPrice,int id) throws SQLException, ClassNotFoundException {
-        try{
+        try {
             Connection con = connect();
             String sql = "SELECT bank FROM users WHERE id=?;";
             PreparedStatement stmnt = con.prepareStatement(sql);
-            stmnt.setInt(1,id);
+            stmnt.setInt(1, id);
             ResultSet rs = stmnt.executeQuery();
 
-            if(rs.next() && rs.getDouble("bank")>=totalPrice){
+            if (rs.next() && rs.getDouble("bank") >= totalPrice) {
                 return true;
-            }
-            else{
+            } else {
                 return false;
             }
-        }catch (SQLException e){
-            System.out.println("SQLException");
-            return false;
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("Exception" + e.getMessage());
             return false;
         }
     }
@@ -148,24 +136,24 @@ public class Buyer extends User{
             stmnt.setDouble(1,bank-totalPrice);
             stmnt.setInt(2,id);
             stmnt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        } catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
     }
-    public void updateSalesmanBank(double bank,double totalPrice,int id) throws SQLException, ClassNotFoundException {
+    public void updateSalesmanBank(double totalPrice,int id) throws SQLException, ClassNotFoundException {
         try{
             Connection con = connect();
+            String saleSql = "SELECT bank FROM users WHERE id=?;";
             String sql = "UPDATE users SET bank=? WHERE id=?;";
             PreparedStatement stmnt = con.prepareStatement(sql);
-            stmnt.setDouble(1,bank-totalPrice);
+            PreparedStatement stmnt1 = con.prepareStatement(saleSql);
+            ResultSet rs = stmnt1.executeQuery();
+            double bank = rs.getDouble("bank");
             stmnt.setInt(2,id);
+            stmnt.setDouble(1,bank-totalPrice);
             stmnt.executeUpdate();
-        } catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        } catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
     }
     public void showOrders() throws SQLException, ClassNotFoundException {
@@ -177,12 +165,9 @@ public class Buyer extends User{
             while(rs.next()){
                 System.out.println(rs.getInt("id")+". \nProduct id: "+ rs.getInt("product_id")+"\nQuantity: "+rs.getInt("quantity")+"\nTotal price: "+rs.getDouble("total_price"));
             }
-        }catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        }catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
-
     }
     public void addOrder(int productId,int buyerId,int quantity,double totalPrice) throws SQLException, ClassNotFoundException {
         try{
@@ -194,13 +179,8 @@ public class Buyer extends User{
             stmnt.setInt(3,quantity);
             stmnt.setDouble(4,totalPrice);
             stmnt.executeUpdate();
-        }catch (SQLException e){
-            System.out.println("SQLException");
-        }catch (ClassNotFoundException e){
-            System.out.println("ClassNotFoundException");
+        }catch (SQLException | ClassNotFoundException e){
+            System.out.println("Exception" + e.getMessage());
         }
-
     }
-
-
 }
