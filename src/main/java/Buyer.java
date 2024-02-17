@@ -63,7 +63,7 @@ public class Buyer extends User{
     public void buyProducts(User buyer,int id, int quantity) throws SQLException, ClassNotFoundException {
         try {
             Connection con = connect();
-            String sql = "SELECT quantity,price,salseman_id FROM product WHERE id=?;";
+            String sql = "SELECT quantity,price,salesman_id FROM product WHERE id=?;";
             PreparedStatement stmnt = con.prepareStatement(sql);
             stmnt.setInt(1,id);
             ResultSet rs = stmnt.executeQuery();
@@ -147,10 +147,20 @@ public class Buyer extends User{
             String sql = "UPDATE users SET bank=? WHERE id=?;";
             PreparedStatement stmnt = con.prepareStatement(sql);
             PreparedStatement stmnt1 = con.prepareStatement(saleSql);
+            stmnt1.setInt(1,id);
             ResultSet rs = stmnt1.executeQuery();
-            double bank = rs.getDouble("bank");
-            stmnt.setInt(2,id);
-            stmnt.setDouble(1,bank-totalPrice);
+            if (rs.next()) {
+                double bank = rs.getDouble("bank");
+                double updatedBank = bank + totalPrice;
+                stmnt.setDouble(1, updatedBank);
+                stmnt.setInt(2, id);
+                stmnt.executeUpdate();
+            } else {
+                System.out.println("No user found with id: " + id);
+            }
+
+
+
             stmnt.executeUpdate();
         } catch (SQLException | ClassNotFoundException e){
             System.out.println("Exception" + e.getMessage());
